@@ -29,3 +29,25 @@ npx supabase migration new <nome>
 ```
 
 Configure as variáveis de `.env.example` em um `.env` local (não versionado).
+
+## Schema de conteúdo
+
+A migration `20261025000000_content_schema.sql` cria:
+
+- `categories`, `tags`, `posts`, `events`, `projects`, `partners`, `contact_messages`
+- bucket público `media` (Storage) para imagens
+- RLS: visitantes leem apenas conteúdo publicado e podem enviar mensagens de contato; só admins escrevem
+
+### Primeiro acesso (admin)
+
+1. Crie o usuário em **Authentication → Users** no painel do Supabase (e-mail + senha).
+2. Promova-o a admin no **SQL Editor**:
+
+```sql
+insert into public.admin_users (user_id)
+select id from auth.users where email = 'voce@gidib.org.br';
+```
+
+### Dados iniciais no projeto remoto
+
+`db push` não roda o seed. Para popular o remoto com o conteúdo original, cole `supabase/seed.sql` no SQL Editor.
