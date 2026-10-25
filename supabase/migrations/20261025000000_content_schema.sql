@@ -82,6 +82,27 @@ create trigger posts_set_updated_at
   before update on public.posts
   for each row execute function public.set_updated_at();
 
+create function public.set_post_published_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.published_at is null then
+    if new.status = 'published' then
+      new.published_at = now();
+    elsif new.status = 'scheduled' and new.publish_at is not null then
+      new.published_at = new.publish_at::timestamptz;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger posts_set_published_at
+  before insert or update on public.posts
+  for each row execute function public.set_post_published_at();
+
 -- ---------------------------------------------------------------- eventos
 create table public.events (
   id uuid primary key default gen_random_uuid(),
